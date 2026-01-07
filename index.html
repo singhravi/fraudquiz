@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz: Social Engineering Fraud</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .option-label:hover {
+            background-color: #f1f5f9;
+        }
+        .correct {
+            background-color: #dcfce7 !important;
+            border-color: #22c55e !important;
+        }
+        .incorrect {
+            background-color: #fee2e2 !important;
+            border-color: #ef4444 !important;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen py-10 px-4 font-sans text-gray-800">
+
+    <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden">
+        <header class="bg-indigo-600 p-8 text-white text-center">
+            <h1 class="text-3xl font-bold">Social Engineering Fraud Quiz</h1>
+            <p class="mt-2 text-indigo-100">Test your knowledge on modern deception tactics</p>
+        </header>
+
+        <div id="quiz-container" class="p-8 space-y-8">
+            <!-- Questions will be injected here -->
+        </div>
+
+        <div id="result-area" class="hidden p-8 border-t border-gray-100 bg-gray-50 text-center">
+            <h2 class="text-2xl font-bold mb-2" id="score-text"></h2>
+            <p id="feedback-text" class="text-gray-600 mb-6"></p>
+            <button onclick="location.reload()" class="bg-indigo-600 text-white px-6 py-2 rounded-full font-semibold hover:bg-indigo-700 transition">Retake Quiz</button>
+        </div>
+
+        <div class="p-8 border-t border-gray-100 text-center" id="action-area">
+            <button id="submit-btn" onclick="checkAnswers()" class="bg-indigo-600 text-white px-10 py-3 rounded-full font-bold text-lg hover:bg-indigo-700 transition transform hover:scale-105">Submit Answers</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                id: 1,
+                question: "What does the term 'Quishing' specifically refer to?",
+                options: [
+                    "Phishing via SMS messages",
+                    "Phishing via malicious QR codes",
+                    "Voice-based social engineering",
+                    "Physical theft of hardware"
+                ],
+                correct: 1
+            },
+            {
+                id: 2,
+                question: "In most consumer payment apps, scanning a QR code is a ______ transaction.",
+                options: [
+                    "Receive (Pull)",
+                    "Verification (Neutral)",
+                    "Send (Push)",
+                    "Credit (Deposit)"
+                ],
+                correct: 2
+            },
+            {
+                id: 3,
+                question: "Which of the following is a physical 'red flag' for a QR code on a public kiosk?",
+                options: [
+                    "The code is black and white",
+                    "The code is smaller than 2 inches",
+                    "The code is a sticker placed over the original surface",
+                    "The code is placed behind a glass pane"
+                ],
+                correct: 2
+            },
+            {
+                id: 4,
+                question: "If a 'Bank Officer' calls you and asks for an OTP to cancel a fraudulent transaction, you should:",
+                options: [
+                    "Give the OTP immediately to stop the fraud",
+                    "Only give the OTP if they know your full name",
+                    "Hang up and call the official bank number yourself",
+                    "Wait for them to send a different verification link"
+                ],
+                correct: 2
+            },
+            {
+                id: 5,
+                question: "When receiving an OTP via SMS, what should you verify besides the 6-digit number?",
+                options: [
+                    "The time of day the message was sent",
+                    "The transaction amount and the merchant name",
+                    "The signal strength of your mobile network",
+                    "The font size of the text message"
+                ],
+                correct: 1
+            },
+            {
+                id: 6,
+                question: "What is 'Vishing'?",
+                options: [
+                    "Phishing via video conferencing",
+                    "Phishing via voice calls",
+                    "Phishing via virtual reality",
+                    "Visual identity theft"
+                ],
+                correct: 1
+            },
+            {
+                id: 7,
+                question: "A stranger asks you to download 'AnyDesk' or 'TeamViewer' to fix your bank account. Why is this dangerous?",
+                options: [
+                    "These apps will delete your photos",
+                    "These apps give the stranger full remote control of your phone",
+                    "These apps drain your battery quickly",
+                    "These apps are illegal to own"
+                ],
+                correct: 1
+            },
+            {
+                id: 8,
+                question: "What is the primary danger of using 'Free Public Wi-Fi' without a VPN?",
+                options: [
+                    "Your internet speed will be too slow",
+                    "Scammers can intercept your data traffic (Man-in-the-Middle)",
+                    "The Wi-Fi will charge you hidden fees later",
+                    "Your hardware will overheat"
+                ],
+                correct: 1
+            },
+            {
+                id: 9,
+                question: "In a 'Marketplace Scam', why does the 'buyer' ask you to scan a QR code?",
+                options: [
+                    "To verify you are a human",
+                    "To pay you the advance amount",
+                    "To trick you into authorizing a withdrawal from your account",
+                    "To share their contact details with you"
+                ],
+                correct: 2
+            },
+            {
+                id: 10,
+                question: "What is a 'Mirror Site'?",
+                options: [
+                    "A site that lets you see your own webcam",
+                    "A duplicate site created to look like a legitimate login page",
+                    "A backup of a website on a different server",
+                    "A site that reverses all text on the screen"
+                ],
+                correct: 1
+            }
+        ];
+
+        function initQuiz() {
+            const container = document.getElementById('quiz-container');
+            questions.forEach((q, index) => {
+                const qDiv = document.createElement('div');
+                qDiv.className = "question-block border-b border-gray-100 pb-6";
+                qDiv.innerHTML = `
+                    <p class="font-bold text-lg mb-4">${index + 1}. ${q.question}</p>
+                    <div class="space-y-2">
+                        ${q.options.map((opt, i) => `
+                            <label class="option-label flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer transition">
+                                <input type="radio" name="q${q.id}" value="${i}" class="mr-3 h-4 w-4 text-indigo-600">
+                                <span>${opt}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(qDiv);
+            });
+        }
+
+        function checkAnswers() {
+            let score = 0;
+            const blocks = document.querySelectorAll('.question-block');
+
+            questions.forEach((q, index) => {
+                const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
+                const options = blocks[index].querySelectorAll('.option-label');
+                
+                // Show correct answer
+                options[q.correct].classList.add('correct');
+
+                if (selected) {
+                    const val = parseInt(selected.value);
+                    if (val === q.correct) {
+                        score++;
+                    } else {
+                        options[val].classList.add('incorrect');
+                    }
+                }
+            });
+
+            // Show results
+            document.getElementById('action-area').classList.add('hidden');
+            document.getElementById('result-area').classList.remove('hidden');
+            document.getElementById('score-text').innerText = `You scored ${score} out of ${questions.length}`;
+            
+            let feedback = "";
+            if (score === 10) feedback = "Excellent! You are a fraud prevention expert.";
+            else if (score >= 7) feedback = "Good job! You have a solid grasp of security basics.";
+            else feedback = "Keep practicing. Awareness is your best defense against fraud.";
+            
+            document.getElementById('feedback-text').innerText = feedback;
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
